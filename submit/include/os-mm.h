@@ -20,7 +20,9 @@ struct pgn_t{
 struct vm_rg_struct {
    unsigned long rg_start;
    unsigned long rg_end;
-   int is_allocated;
+   
+   // added field : check if vm region is allocated or not
+   int is_alloc;
 
    struct vm_rg_struct *rg_next;
 };
@@ -66,9 +68,12 @@ struct framephy_struct {
    struct framephy_struct *fp_next;
 
    /* Resereed for tracking allocated framed */
-   struct mm_struct* owner; //memory management of owner process
-   int pte_id; // page number of vm_area
-   struct pcb_t *p_owner; //process that have vm area link to this physical page
+   //memory management of owner process
+   struct mm_struct* owner; 
+   //the id of page table that map a virtual mm with this frame
+   int pte_id; 
+   //the process has virtual mm map with this frame
+   struct pcb_t *mapping_process; 
 };
 
 struct memphy_struct {

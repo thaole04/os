@@ -168,11 +168,16 @@ int MEMPHY_dump(struct memphy_struct *mp)
    printf("Memory Dump:\n");
    printf("-----------\n");
 
-   if (mp == NULL || mp->storage == NULL)
-   {
-      printf("Invalid memory structure.\n");
-      return -1;
-   }
+
+   if(mp == NULL){
+    	printf("Physical Memory is not available\n");
+    	return -1;  
+    }
+    
+    if(mp -> storage == NULL){
+    	printf("No value to print out\n"); 
+    	return -1; 
+    }
 
    for (int i = 0; i < mp->maxsz; ++i)
    {
