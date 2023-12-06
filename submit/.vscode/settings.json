@@ -1,0 +1,15 @@
+{
+    "files.associations": {
+        "common.h": "c",
+        "loader.h": "c",
+        "string.h": "c",
+        "variant": "c",
+        "chrono": "c",
+        "stdlib.h": "c",
+        "queue.h": "c",
+        "cpu.h": "c",
+        "pthread.h": "c",
+        "__availability": "c",
+        "atomic": "c"
+    }
+}
