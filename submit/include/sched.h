@@ -4,6 +4,7 @@
 #include "common.h"
 #include "queue.h"
 
+#define MLQ_SCHED
 #ifndef MLQ_SCHED
 #define MLQ_SCHED
 #endif
