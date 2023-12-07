@@ -104,7 +104,7 @@ int vmap_page_range(struct pcb_t *caller,           // process call
     // Update the page table entry at the given addressS
     pte_set_fpn(&caller->mm->pgd[pgn + pgit], fpit->fpn);
 
-    // 1 frame physic = 1 page logic, update more space for vm_area
+    // Update the region boundaries
     ret_rg->rg_end += PAGING_PAGESZ;
 
     /* Tracking for later page replacement activities (if needed)
@@ -112,7 +112,7 @@ int vmap_page_range(struct pcb_t *caller,           // process call
     enlist_pgn_node(&caller->mm->fifo_pgn, pgn + pgit);
     enlist_fpn_node(&caller->mram->used_fp_list, fpit->fpn, caller->mm, pgn + pgit, caller);
 
-    fpit->mapping_process = caller;
+    fpit->p_owner = caller;
     fpit->pte_id= pgn + pgit;
 
     // Move to the next frame in the list

@@ -6,12 +6,19 @@
 
 #define MAX_QUEUE_SIZE 10
 
-struct queue_t
-{
-	struct pcb_t *proc[MAX_QUEUE_SIZE];
-	int size;
+/**
+ * @struct queue_t
+ * @brief Represents a queue data structure for storing process control blocks
+ * (PCBs).
+ *
+ * The queue_t struct contains an array of pointers to PCBs, the size of the
+ * queue, and an optional field for CPU remainder (used in MLQ scheduling).
+ */
+struct queue_t {
+  struct pcb_t *proc[MAX_QUEUE_SIZE]; /**< Array of pointers to PCBs */
+  int size;                           /**< Size of the queue */
 #ifdef MLQ_SCHED
-	int slot_cpu_can_use;
+  int cpuRemainder; /**< CPU remainder for MLQ scheduling */
 #endif
 };
 
