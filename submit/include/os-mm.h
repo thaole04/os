@@ -1,7 +1,7 @@
 #ifndef OSMM_H
 #define OSMM_H
 
-// #define MM_PAGING 1 // redefine
+#define MM_PAGING 1 // redefine
 #define PAGING_MAX_MMSWP 4 /* max number of supported swapped space */
 #define PAGING_MAX_SYMTBL_SZ 30
 

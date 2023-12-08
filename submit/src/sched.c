@@ -1,14 +1,15 @@
 
+#include "queue.h"
 #include "sched.h"
-#include "../include/queue.h"
-#include <pthread.h>
 
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 static struct queue_t ready_queue;
 static struct queue_t run_queue;
 
-// synchronized for sched
+// Synchronization variables
 static pthread_mutex_t queue_lock;
 
 #ifdef MLQ_SCHED
@@ -19,8 +20,7 @@ int queue_empty(void) {
 #ifdef MLQ_SCHED
   unsigned long prio;
   for (prio = 0; prio < MAX_PRIO; prio++)
-    if (!empty(&mlq_ready_queue[prio]))
-      return -1;
+    if (!empty(&mlq_ready_queue[prio])) return -1;
 #endif
   return (empty(&ready_queue) && empty(&run_queue));
 }
@@ -32,13 +32,13 @@ void init_scheduler(void) {
   for (i = 0; i < MAX_PRIO; i++) {
     mlq_ready_queue[i].size = 0;
     // init number of cpu each queue can use maximally
-    mlq_ready_queue[i].slot_cpu_can_use = MAX_PRIO - i;
+    mlq_ready_queue[i].cpuRemainder = MAX_PRIO - i;
   }
 
 #endif
   ready_queue.size = 0;
   run_queue.size = 0;
-  run_queue.slot_cpu_can_use = MAX_PRIO;
+  run_queue.cpuRemainder = MAX_PRIO;
   pthread_mutex_init(&queue_lock, NULL);
 }
 
@@ -54,18 +54,19 @@ void init_scheduler(void) {
 struct pcb_t *get_mlq_proc(void) {
   struct pcb_t *proc = NULL;
   unsigned long curr_prio = 0, max_prio = MAX_PRIO;
+  // find the highest priority queue that has process
   while (curr_prio < max_prio) {
+    // if there is a process in this queue and this queue still has slot
     if (!empty(&mlq_ready_queue[curr_prio]) &&
-        mlq_ready_queue[curr_prio].slot_cpu_can_use > 0) {
-
+        mlq_ready_queue[curr_prio].cpuRemainder > 0) {
       proc = dequeue(&mlq_ready_queue[curr_prio]);
       if (proc != NULL) {
-        // decrease slot_cpu_can_use
-        mlq_ready_queue[curr_prio].slot_cpu_can_use--;
+        // decrease cpuRemainder
+        mlq_ready_queue[curr_prio].cpuRemainder--;
       }
-
       break;
     } else {
+      // if there is no process in this queue or this queue has no slot
       curr_prio++;
     }
   }
@@ -75,7 +76,8 @@ struct pcb_t *get_mlq_proc(void) {
 void put_mlq_proc(struct pcb_t *proc) {
   pthread_mutex_lock(&queue_lock);
   enqueue(&mlq_ready_queue[proc->prio], proc);
-  mlq_ready_queue[proc->prio].slot_cpu_can_use++; // increase slot_cpu_can_use
+  // increase cpuRemainder
+  mlq_ready_queue[proc->prio].cpuRemainder++;
   pthread_mutex_unlock(&queue_lock);
 }
 
@@ -93,8 +95,8 @@ void add_proc(struct pcb_t *proc) { return add_mlq_proc(proc); }
 
 void finish_proc(struct pcb_t **proc) {
   pthread_mutex_lock(&queue_lock);
-  // increase slot_cpu_can_use
-  mlq_ready_queue[(*proc)->prio].slot_cpu_can_use++;
+  // increase cpuRemainder
+  mlq_ready_queue[(*proc)->prio].cpuRemainder++;
 
   pthread_mutex_unlock(&queue_lock);
   free(*proc);
@@ -106,7 +108,6 @@ struct pcb_t *get_proc(void) {
    * Remember to use lock to protect the queue.
    * */
   if (!empty(&ready_queue)) {
-
     proc = dequeue(&ready_queue);
   }
   return proc;
